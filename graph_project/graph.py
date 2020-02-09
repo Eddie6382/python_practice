@@ -1,4 +1,5 @@
 import numpy as np
+from collections import deque
 '''
 2D dynamic array: [list() for i in range(length)]
 
@@ -34,17 +35,17 @@ class Node():
         self._finish = 0
         self._color = WHITE
         self._idx = idx
-        self._parent = -1
+        self._parents = []
 
     def reset():
         self._discover = 0
         self._finish = 0
         self._color = WHITE
-        self._parent = -1
+        self._parents = []
 
     def __str__(self):
-        print("node{}: parent is {}, discover at {}, finish at {}"
-                .format(self._idx, self._parent, self._discover, self._finish))
+        return ("node{}: parent is node{}, discover at {}, finish at {}"
+                .format(self._idx, self._parents, self._discover, self._finish))
 
 class Graph():
     def __init__(self, vertices):
@@ -52,22 +53,47 @@ class Graph():
         self._adjList = [list() for i in range(vertices)]
         self._adjMatrix = [[0]*vertices]*vertices
         self._time = 0
+        self._nodeList = dict()
+        self._cycles = []
 
     def printEdge(self):
+        print("Adjacent List")
         for i in range(self._v):
             print(i, self._adjList[i])
+        print("")
 
-    def DFStraversal(self, u):
+    def printNode(self, idx):
+        print(self._nodeList[idx])
+
+    def DFStraversal(self, u_idx):
+        u = self._nodeList[u_idx]
         self._time = self._time + 1
         u._discover = self._time
         u._color = GRAY
-        for v in self._adjList[u._idx]:
+        for v_idx in self._adjList[u._idx]:
+            v = self._nodeList[v_idx]
             if v._color == WHITE:
-                v._parent = u._idx
-                DFStraversal(self, v)
+                v._parents.append(u._idx)
+                self.DFStraversal(v_idx)
+            if v._color == GRAY:
+                v._parents.append(u._idx)
+                self.findCycle(v)
+
         u._color = BLACK
         self._time = self._time + 1
         u._finish = self._time
+
+    def findCycle(self, u):
+        cycle = [u._idx]
+        i = u._parents[-1]
+        while i != u._idx:
+            cycle.append(i)
+            i = self._nodeList[i]._parents[-1]
+        self._cycles.append(cycle)
+
+    def printCyclic(self):
+        for cycle in self._cycles:
+            print("cycle:",cycle)
 
         
 class undirectGraph(Graph):
@@ -75,7 +101,9 @@ class undirectGraph(Graph):
         Graph.__init__(self, vertices)
     
     def addEdge(self, m, n, weight = 1):
-        self._adjList[m].append(Node(n))
+        self._nodeList[m] = Node(m)
+        self._nodeList[n] = Node(n)
+        self._adjList[m].append(n)
         self._adjMatrix[m][n] = weight
         self._adjMatrix[n][m] = weight
 
@@ -84,6 +112,8 @@ class directGraph(Graph):
         Graph.__init__(self, vertices)
 
     def addEdge(self, m, n, weight = 1):
+        self._nodeList[m] = Node(m)
+        self._nodeList[n] = Node(n)
         self._adjList[m].append(n)
         self._adjMatrix[m][n] = weight
     

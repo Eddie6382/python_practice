@@ -11,3 +11,9 @@ if __name__ == "__main__":
     g.addEdge(3, 3)
     g.printEdge()
 
+    g.DFStraversal(2)
+    g.printCyclic()
+    g.printNode(0)
+    g.printNode(1)
+    g.printNode(2)
+    g.printNode(3)
