@@ -1,0 +1,6 @@
+print('hello')
+print(3.14)
+print('5+2:', 5+2)
+print('5-2:', 5-2)
+print('5*2:', 5*2)
+print('5/2:', 5/2)
